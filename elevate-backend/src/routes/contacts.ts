@@ -1,4 +1,4 @@
-import { Env, Contact, jsonResponse, errorResponse, crypto_randomUUID } from "../types.js";
+import { Env, Contact, jsonResponse, errorResponse, randomUUID } from "../types.js";
 
 // ── GET /contacts ─────────────────────────────────────────────────────────────
 export async function listContacts(env: Env): Promise<Response> {
@@ -24,7 +24,7 @@ export async function createContact(
     return errorResponse("first_name and last_name are required");
   }
 
-  const id = crypto_randomUUID();
+  const id = randomUUID();
   await env.DB.prepare(
     `INSERT INTO contacts (id, first_name, last_name, email, phone, company, status, notes)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?)`

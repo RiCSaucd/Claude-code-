@@ -4,7 +4,7 @@ import {
   AiMessage,
   jsonResponse,
   errorResponse,
-  crypto_randomUUID,
+  randomUUID,
 } from "../types.js";
 
 interface AnthropicMessage {
@@ -58,7 +58,7 @@ export async function createConversation(
     body = {};
   }
 
-  const id = crypto_randomUUID();
+  const id = randomUUID();
   await env.DB.prepare(
     "INSERT INTO ai_conversations (id, contact_id, title) VALUES (?, ?, ?)"
   )
@@ -110,7 +110,7 @@ export async function sendAiMessage(
   ];
 
   // Save the user message
-  const userMsgId = crypto_randomUUID();
+  const userMsgId = randomUUID();
   await env.DB.prepare(
     "INSERT INTO ai_messages (id, conversation_id, role, content) VALUES (?, ?, 'user', ?)"
   )
@@ -127,7 +127,7 @@ export async function sendAiMessage(
   }
 
   // Save the assistant reply
-  const asstMsgId = crypto_randomUUID();
+  const asstMsgId = randomUUID();
   await env.DB.prepare(
     "INSERT INTO ai_messages (id, conversation_id, role, content) VALUES (?, ?, 'assistant', ?)"
   )

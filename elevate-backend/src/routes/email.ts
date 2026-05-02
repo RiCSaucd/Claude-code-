@@ -3,7 +3,7 @@ import {
   Email,
   jsonResponse,
   errorResponse,
-  crypto_randomUUID,
+  randomUUID,
 } from "../types.js";
 
 interface ResendResponse {
@@ -79,7 +79,7 @@ export async function sendEmail(request: Request, env: Env): Promise<Response> {
     console.error("Resend error:", err);
   }
 
-  const id = crypto_randomUUID();
+  const id = randomUUID();
   await env.DB.prepare(
     `INSERT INTO emails (id, contact_id, subject, body_html, resend_id, status)
      VALUES (?, ?, ?, ?, ?, ?)`

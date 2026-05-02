@@ -3,7 +3,7 @@ import {
   Message,
   jsonResponse,
   errorResponse,
-  crypto_randomUUID,
+  randomUUID,
 } from "../types.js";
 
 interface TwilioResponse {
@@ -76,7 +76,7 @@ export async function sendSms(request: Request, env: Env): Promise<Response> {
     console.error("Twilio error:", err);
   }
 
-  const id = crypto_randomUUID();
+  const id = randomUUID();
   await env.DB.prepare(
     `INSERT INTO messages (id, contact_id, direction, body, twilio_sid, status)
      VALUES (?, ?, 'outbound', ?, ?, ?)`

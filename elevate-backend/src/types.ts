@@ -82,6 +82,6 @@ export function errorResponse(message: string, status = 400): Response {
   return jsonResponse<never>({ success: false, error: message }, status);
 }
 
-export function crypto_randomUUID(): string {
+export function randomUUID(): string {
   return crypto.randomUUID();
 }
