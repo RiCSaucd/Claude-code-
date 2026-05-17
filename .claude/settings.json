@@ -1,9 +1,4 @@
 {
   "model": "NousResearch/Hermes-3-Llama-3.1-8B",
-  "apiProvider": "openai-compatible",
-  "apiBaseUrl": "${HERMES_API_BASE_URL:-http://localhost:11434/v1}",
-  "env": {
-    "ANTHROPIC_BASE_URL": "${HERMES_API_BASE_URL:-http://localhost:11434/v1}",
-    "ANTHROPIC_API_KEY": "${HERMES_API_KEY:-ollama}"
-  }
+  "apiProvider": "openai-compatible"
 }
