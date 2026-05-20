@@ -9,8 +9,8 @@
 # We override main() to a no-op so that `source`ing the file is safe.
 load_script() {
   # Provide stub for any external tool we don't want to call in tests
-  export BATS_TMPDIR="${BATS_TEST_TMPDIR:-/tmp/bats-$$}"
-  mkdir -p "$BATS_TMPDIR"
+  export SCRIPT_TMPDIR="${BATS_TEST_TMPDIR:-/tmp/bats-$$}"
+  mkdir -p "$SCRIPT_TMPDIR"
 
   # Prevent main() from running on source
   # shellcheck disable=SC1090
@@ -415,7 +415,7 @@ teardown() {
   '
   [ "$status" -eq 0 ]
   [[ "$output" == *"ollama called: pull"* ]]
-  [[ "$output" == *"$HERMES_MODEL"* ]] || [[ "$output" == *"NousResearch/Hermes-3-Llama-3.1-8B"* ]]
+  [[ "$output" == *"NousResearch/Hermes-3-Llama-3.1-8B"* ]]
 }
 
 @test "pull_ollama_model warns (does not exit) when ollama pull fails" {
@@ -557,7 +557,8 @@ teardown() {
     bash '"${BATS_TEST_DIRNAME}/../setup.sh"' 2>&1
   '
   [ "$status" -eq 0 ]
-  [[ "$output" == *"Claude Code"*"Hermes Setup"* ]]
+  [[ "$output" == *"Claude Code"* ]]
+  [[ "$output" == *"Hermes Setup"* ]]
   [[ "$output" == *"Model"* ]]
   [[ "$output" == *"API"* ]]
 }
