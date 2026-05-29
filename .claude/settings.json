@@ -1,0 +1,4 @@
+{
+  "model": "NousResearch/Hermes-3-Llama-3.1-8B",
+  "apiProvider": "openai-compatible"
+}
