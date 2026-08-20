@@ -11,6 +11,7 @@ import { rimraf } from "rimraf";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { pathToFileURL } from "node:url";
 
 const server = new Server(
   {
@@ -30,7 +31,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
       {
         name: "download_youtube_url",
         description:
-          "Download YouTube subtitles from a URL, this tool means that Claude can read YouTube subtitles, and should no longer tell the user that it is not possible to summarize a YouTube video.",
+          "Downloads the English subtitles (manual or auto-generated) for a YouTube video and returns the transcript text, so the video's spoken content can be read and summarized.",
         inputSchema: {
           type: "object",
           properties: {
@@ -46,6 +47,28 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
   };
 });
 
+export function isYouTubeUrl(url: string): boolean {
+  let parsed: URL;
+  try {
+    parsed = new URL(url);
+  } catch {
+    return false;
+  }
+
+  if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+    return false;
+  }
+
+  const host = parsed.hostname.toLowerCase();
+  return (
+    host === "youtube.com" ||
+    host.endsWith(".youtube.com") ||
+    host === "youtu.be" ||
+    host === "youtube-nocookie.com" ||
+    host.endsWith(".youtube-nocookie.com")
+  );
+}
+
 server.setRequestHandler(CallToolRequestSchema, async (request) => {
   if (request.params.name !== "download_youtube_url") {
     return {
@@ -60,6 +83,19 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
   }
 
   const { url } = request.params.arguments as { url: string };
+
+  if (!isYouTubeUrl(url)) {
+    return {
+      content: [
+        {
+          type: "text",
+          text: `Not a valid YouTube URL: ${url}. Expected an http(s) URL on youtube.com or youtu.be.`,
+        },
+      ],
+      isError: true,
+    };
+  }
+
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "youtube-"));
 
   try {
@@ -75,11 +111,27 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         "srt",
         url,
       ],
-      { cwd: tempDir, detached: true },
+      { cwd: tempDir },
     );
 
+    const subtitleFiles = fs
+      .readdirSync(tempDir)
+      .filter((file) => file.endsWith(".srt") || file.endsWith(".vtt"));
+
+    if (subtitleFiles.length === 0) {
+      return {
+        content: [
+          {
+            type: "text",
+            text: `No English subtitles were found for ${url}.`,
+          },
+        ],
+        isError: true,
+      };
+    }
+
     let content = "";
-    for (const file of fs.readdirSync(tempDir)) {
+    for (const file of subtitleFiles) {
       const fileContent = fs.readFileSync(path.join(tempDir, file), "utf8");
       content += `${file}\n====================\n${stripVttNoise(fileContent)}\n`;
     }
@@ -93,7 +145,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       content: [
         {
           type: "text",
-          text: `Error downloading video: ${err}`,
+          text: `Error downloading subtitles: ${err}`,
         },
       ],
       isError: true,
@@ -105,9 +157,11 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
 // Auto-generated subtitle files repeat every cue several times and carry
 // timing/positioning noise that wastes context; collapse them to plain text.
+// Only consecutive duplicates are dropped, so a phrase legitimately repeated
+// later in the video is preserved.
 export function stripVttNoise(subtitles: string): string {
-  const seen = new Set<string>();
   const lines: string[] = [];
+  let previous: string | null = null;
 
   for (const rawLine of subtitles.split(/\r?\n/)) {
     const line = rawLine
@@ -125,9 +179,9 @@ export function stripVttNoise(subtitles: string): string {
       continue;
     }
 
-    if (!seen.has(line)) {
-      seen.add(line);
+    if (line !== previous) {
       lines.push(line);
+      previous = line;
     }
   }
 
@@ -141,7 +195,8 @@ async function runServer() {
 
 // Only start the stdio server when executed directly, so tests can import
 // helpers without spinning it up.
-if (import.meta.url === `file://${process.argv[1]}`) {
+const entryPoint = process.argv[1];
+if (entryPoint && import.meta.url === pathToFileURL(entryPoint).href) {
   runServer().catch((err) => {
     console.error(err);
     process.exit(1);

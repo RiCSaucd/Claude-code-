@@ -10,7 +10,7 @@
         "spawn-rx": "^4.0.0",
       },
       "devDependencies": {
-        "bun-types": "latest",
+        "bun-types": "^1.3.14",
         "shx": "^0.3.4",
       },
     },

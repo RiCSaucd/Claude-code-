@@ -8,7 +8,7 @@
   "type": "module",
   "main": "dist/index.js",
   "scripts": {
-    "prepublish": "git clean -xdf dist && bun build --target node src/index.ts --outdir dist",
+    "prepublishOnly": "git clean -xdf dist && bun build --target node src/index.ts --outdir dist",
     "test": "bun test"
   },
   "author": "Ani Betts <anais@anaisbetts.org>",
@@ -20,6 +20,6 @@
   },
   "devDependencies": {
     "shx": "^0.3.4",
-    "bun-types": "latest"
+    "bun-types": "^1.3.14"
   }
 }
