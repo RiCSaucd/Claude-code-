@@ -79,5 +79,26 @@ configuration for the Claude Code project settings.
 ├── .claude/
 │   └── settings.json   # Claude Code project configuration
 ├── setup.sh            # One-shot setup script
+├── site-kit/           # CCC Site Kit scripts (see site-kit/README.md)
+│   ├── build.sh
+│   ├── deploy.sh
+│   ├── use-stock.sh
+│   └── README.md
 └── README.md
 ```
+
+---
+
+## site-kit/
+
+`site-kit/` holds the CCC Site Kit shell scripts and their README. It is
+independent of the Hermes setup above.
+
+Only the shell scripts and the README are present. The kit's README also refers
+to `site.config.mjs`, `render.mjs`, `stamp.mjs`, and the `engine/`, `templates/`,
+`render/`, `reference/`, and `stock/` folders, none of which are in this
+repository yet, so the scripts are not runnable as-is.
+
+The scripts also assume a macOS shell environment: they use `#!/bin/zsh`, and
+`build.sh` calls `sips` (macOS only) plus `ffmpeg`, `ffprobe`, and `bc` without
+checking that they exist.
